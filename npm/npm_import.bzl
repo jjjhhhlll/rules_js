@@ -82,6 +82,7 @@ def npm_translate_lock(
         lifecycle_hooks_envs = {},
         lifecycle_hooks_exclude = [],
         lifecycle_hooks_execution_requirements = {},
+        lifecycle_hooks_toolchains = {},
         lifecycle_hooks_no_sandbox = True,
         bins = {},
         verify_node_modules_ignored = None,
@@ -266,6 +267,15 @@ def npm_translate_lock(
 
             Read more: [lifecycles](/docs/pnpm.md#lifecycles)
 
+        lifecycle_hooks_toolchains: Toolchains available for the lifecycle hooks actions on npm packages.
+            Toolchains may be needed for lifecycle hooks in cases where a node module depends on
+            native code that must be built.
+
+            The toolchains can be defined per package by package name or globally using "*".
+            Multiple toolchains are additive.
+
+            Read more: [lifecycles](/docs/pnpm.md#lifecycles)
+
         lifecycle_hooks_no_sandbox: If True, a "no-sandbox" execution requirement is added to all lifecycle hooks
             unless overridden by `lifecycle_hooks_execution_requirements`.
 
@@ -434,6 +444,7 @@ WARNING: `package_json` attribute in `npm_translate_lock(name = "{name}")` is de
         lifecycle_hooks = lifecycle_hooks,
         lifecycle_hooks_envs = lifecycle_hooks_envs,
         lifecycle_hooks_execution_requirements = lifecycle_hooks_execution_requirements,
+        lifecycle_hooks_toolchains = lifecycle_hooks_toolchains,
         bins = bins_string_list_dict,
         verify_node_modules_ignored = verify_node_modules_ignored,
         verify_patches = verify_patches,
@@ -472,6 +483,7 @@ def npm_import(
         lifecycle_hooks = [],
         lifecycle_hooks_execution_requirements = ["no-sandbox"],
         lifecycle_hooks_env = [],
+        lifecycle_hooks_toolchains = [],
         integrity = "",
         url = "",
         commit = "",
@@ -639,6 +651,19 @@ def npm_import(
             This defaults to ["no-sandbox"] to limit the overhead of sandbox creation and copying the output
             TreeArtifact out of the sandbox.
 
+        lifecycle_hooks_toolchains: Toolchains available for the lifecycle hooks action for this npm package.
+
+            Lifecycle hooks may need toolchains for npm packages that require compilation (e.g. node-gyp).
+
+            For example:
+
+            ```
+            # use hermetic python from rules_python when running npm/node-gyp
+            # the toolchain makes the $(PYTHON3) variable available to be used in lifecycle_hooks_env
+            lifecycle_hooks_env = [ "python=$(PYTHON3)" ],
+            lifecycle_hooks_toolchains = [ "@rules_python//python:current_py_toolchain" ]
+            ```
+
         integrity: Expected checksum of the file downloaded, in Subresource Integrity format.
             This must match the checksum of the file downloaded.
 
@@ -784,6 +809,7 @@ def npm_import(
         lifecycle_build_target = has_lifecycle_hooks or has_custom_postinstall,
         lifecycle_hooks_env = lifecycle_hooks_env,
         lifecycle_hooks_execution_requirements = lifecycle_hooks_execution_requirements,
+        lifecycle_hooks_toolchains = lifecycle_hooks_toolchains,
         bins = bins,
         npm_translate_lock_repo = npm_translate_lock_repo,
     )

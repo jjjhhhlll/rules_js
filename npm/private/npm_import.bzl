@@ -143,6 +143,7 @@ def npm_imported_package_store(
             mnemonic = "NpmLifecycleHook",
             progress_message = "Running lifecycle hooks on npm package {package}@{version}",
             env = {lifecycle_hooks_env},
+            toolchains = {lifecycle_hooks_toolchains},
         )
 
         # post-lifecycle npm_package
@@ -707,6 +708,11 @@ def _impl_links(rctx):
     for ec in rctx.attr.lifecycle_hooks_execution_requirements:
         lifecycle_hooks_execution_requirements[ec] = "1"
 
+    lifecycle_hooks_toolchains = []
+    for tc in rctx.attr.lifecycle_hooks_toolchains:
+        if tc not in lifecycle_hooks_toolchains:
+            lifecycle_hooks_toolchains.append(tc)
+
     maybe_bins = ("""
         bins = %s,""" % starlark_codegen_utils.to_dict_attr(rctx.attr.bins, 3)) if len(rctx.attr.bins) > 0 else ""
 
@@ -723,6 +729,7 @@ def _impl_links(rctx):
         lifecycle_hooks_execution_requirements = starlark_codegen_utils.to_dict_attr(lifecycle_hooks_execution_requirements),
         lifecycle_hooks_env = starlark_codegen_utils.to_dict_attr(lifecycle_hooks_env),
         lifecycle_output_dir = lifecycle_output_dir,
+        lifecycle_hooks_toolchains = starlark_codegen_utils.to_list_attr(lifecycle_hooks_toolchains),
         npm_link_package_bzl = "@%s//:%s" % (rctx.name, _DEFS_BZL_FILENAME),
         link_packages = starlark_codegen_utils.to_dict_attr(link_packages, 1, quote_value = False),
         package = rctx.attr.package,
@@ -755,6 +762,7 @@ _ATTRS_LINKS = dicts.add(_COMMON_ATTRS, {
     "lifecycle_build_target": attr.bool(),
     "lifecycle_hooks_env": attr.string_list(),
     "lifecycle_hooks_execution_requirements": attr.string_list(),
+    "lifecycle_hooks_toolchains": attr.string_list(),
     "npm_translate_lock_repo": attr.string(),
     "transitive_closure": attr.string_list_dict(),
 })

@@ -24,6 +24,7 @@ _ATTRS = {
     "lifecycle_hooks": attr.string_list_dict(),
     "lifecycle_hooks_envs": attr.string_list_dict(),
     "lifecycle_hooks_execution_requirements": attr.string_list_dict(),
+    "lifecycle_hooks_toolchains": attr.string_list_dict(),
     "link_workspace": attr.string(),
     "no_optional": attr.bool(),
     "npm_package_lock": attr.label(),
